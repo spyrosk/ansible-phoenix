@@ -1,0 +1,37 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  become_user: root
+  #vars_files:
+  tasks:
+  - name: Add Erlang Solutions Repo
+    apt_repository:
+      repo: 'deb http://packages.erlang-solutions.com/ubuntu {{ansible_lsb.codename}} contrib'
+      state: present
+  - name: Add Erlang Solutions Key
+    apt_key:
+      url: http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+  - name: Refresh Apt cache
+    apt: update_cache=yes
+  - name: Install required packages
+    apt: name={{ item }} state=present
+    with_items:
+      - git
+      - build-essential
+      - esl-erlang
+      - elixir
+  - name: Install hex
+    # TODO: Use a variable to install a specific hex version and remove touch
+    shell: "mix local.hex --force && touch /home/{{ ansible_user }}/.hex_installed"
+    args:
+      creates: "/home/{{ ansible_user }}/.hex_installed"
+    become: false
+  - name: Install Phoenix
+    shell: mix archive.install https://github.com/phoenixframework/archives/raw/master/phx_new.ez --force
+    args:
+      creates: "/home/{{ ansible_user }}/.mix/archives/phx_new"
+    become: false
+    # TODO install node/npm
+    # TODO install postgresql
+    # TODO install inotify-tools
