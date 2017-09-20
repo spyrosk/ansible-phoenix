@@ -3,7 +3,8 @@
   remote_user: vagrant
   become: true
   become_user: root
-  #vars_files:
+  vars_files:
+    - vars/postgresql.yml
   tasks:
   - name: Add Erlang Solutions Repo
     apt_repository:
@@ -19,6 +20,7 @@
     with_items:
       - git
       - build-essential
+      - inotify-tools
       - esl-erlang
       - elixir
   - name: Install hex
@@ -32,6 +34,7 @@
     args:
       creates: "/home/{{ ansible_user }}/.mix/archives/phx_new"
     become: false
-    # TODO install node/npm
-    # TODO install postgresql
-    # TODO install inotify-tools
+  roles:
+    - { role: geerlingguy.security }
+    - { role: geerlingguy.nodejs }
+    - { role: geerlingguy.postgresql }
